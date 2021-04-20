@@ -19,11 +19,7 @@
             contentType: 'application/json',
             success: showRoute,
             error: function ajaxError(jqXHR, textStatus, errorThrown) {
-                console.error(
-                    'Error generating random route: ', 
-                    textStatus, 
-                    ', Details: ', 
-                    errorThrown);
+                console.error('Error generating random route: ', textStatus, ', Details: ', errorThrown);
                 console.error('Response: ', jqXHR.responseText);
                 alert('An error occurred when creating a random route:\n' + jqXHR.responseText);
             }
