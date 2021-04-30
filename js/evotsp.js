@@ -289,8 +289,21 @@
   // as the `success` callback function in your Ajax call. That will
   // ensure that the best routes that you get from the HTTP call will
   // be passed along in the `runGeneration` waterfall. 
-  function getBestRoutes(generation, callback) {
-    // FILL THIS IN
+  function getBestRoutes(gen, callback) {
+    const runId = $('#runId-text-field').val();
+    const amount = $('#num-parents').val();
+    const queryString = $.param({ runId, gen, amount })
+    $.ajax({
+        method: 'GET',
+        url: baseUrl + '/best?' + queryString,
+        success: (bestRoutes) => callback(null, bestRoutes),
+        error: function ajaxError(jqXHR, textStatus, errorThrown) {
+            console.error('Error getting best routes: ', textStatus, ', Details: ', errorThrown);
+            console.error('Response: ', jqXHR.responseText);
+            alert('An error occurred when creating a random route:\n' + jqXHR.responseText);
+            callback(errorThrown);
+        }
+    })
   }
 
   // Create the specified number of children by mutating the given
