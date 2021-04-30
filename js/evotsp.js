@@ -1,6 +1,5 @@
-(function evoTSPwrapper($) {
-  const baseUrl =
-    "https://nh5gsos957.execute-api.us-east-1.amazonaws.com/prod/";
+(function evoTSPWrapper($) {
+  const baseUrl = "https://0z2figs2v9.execute-api.us-east-1.amazonaws.com/prod";
 
   /*
    * This is organized into sections:
@@ -65,7 +64,7 @@
     // cb in this (and down below in runGeneration) is short for "callback".
     // Each of the functions in the series takes a callback as its last
     // (sometimes only) argument. That needs to be either passed in to a
-    // nested async tool (like `asyn.timesSeries` below) or called after
+    // nested async tool (like `async.timesSeries` below) or called after
     // the other work is done (like the `cb()` call in the last function).
     async.series([
       initializePopulation, // create the initial population
@@ -75,13 +74,11 @@
 
     function initializePopulation(cb) {
       const populationSize = parseInt($("#population-size-text-field").val());
-      console.log(
-        `Initializing pop for runId = ${runId} with pop size ${populationSize}, generation = ${initialGeneration}`
-      );
+      console.log(`Initializing pop for runId = ${runId} with pop size ${populationSize}, generation = ${initialGeneration}`);
       $("#new-route-list").text("");
       async.times(
         populationSize,
-        (counter, rr_cb) => randomRoute(runId, initialGeneration, rr_cb),
+        (_, rr_cb) => randomRoute(runId, initialGeneration, rr_cb),
         cb
       );
     }
@@ -120,24 +117,21 @@
   }
 
   function randomRoute(runId, generation, cb) {
-    AWSAjax(
-      {
-        runId: runId,
-        generation: generation,
-        lengthStoreThreshold: lengthStoreThreshold,
-      },
-      "/routes",
-      displayRoute,
-      ["generating random route", "when creating a random route"]
-    )
-      // If the Ajax call succeeds, return the newly generated route.
-      .done((newRoute) => { cb(null, newRoute); })
-      // If the Ajax call fails, print a message and pass the error up through
-      // the callback function `cb`.
-      .fail((jqHXR, textStatus, err) => {
-        console.error("Problem with randomRoute AJAX call: " + textStatus);
-        cb(err);
-      });
+    $.ajax({
+      method: 'POST',
+      url: baseUrl + '/routes',
+      data: JSON.stringify({runId, generation, lengthStoreThreshold})
+    })
+    .done((newRoute) => { 
+      displayRoute(newRoute)
+      cb(null, newRoute); 
+    })
+    .fail((jqXHR, textStatus, errorThrown) => {
+      console.error('Error getting random route: ', textStatus, ', Details: ', errorThrown);
+      console.error('Response: ', jqXHR.responseText);
+      alert('An error occurred when creating a random route:\n' + jqXHR.responseText);
+      cb(errorThrown);
+    });
   }
 
   ////////////////////////////////////////////////////////////
@@ -328,7 +322,16 @@
   // that information. Make sure you pass `callback` as the `success` callback
   // function in the Ajax call.
   function fetchCityData(callback) {
-    // FILL THIS IN
+    $.ajax({
+      method: 'GET',
+      url: baseUrl + '/city-data',
+      success: callback,
+      error: function ajaxError(jqXHR, textStatus, errorThrown) {
+        console.error('Error fetching city data: ', textStatus, ', Details: ', errorThrown);
+        console.error('Response: ', jqXHR.responseText);
+        alert('An error occurred when fetching city data:\n' + jqXHR.responseText);
+      }
+    })
   }
 
   ////////////////////////////////////////////////////////////
