@@ -120,18 +120,15 @@
     $.ajax({
       method: 'POST',
       url: baseUrl + '/routes',
-      data: JSON.stringify({runId, generation, lengthStoreThreshold})
+      data: JSON.stringify({runId, generation, lengthStoreThreshold}),
+      success: newRoute => [displayRoute(newRoute), cb(null, newRoute)],
+      error: (jqXHR, textStatus, errorThrown) => {
+        console.error('Error getting random route: ', textStatus, ', Details: ', errorThrown);
+        console.error('Response: ', jqXHR.responseText);
+        alert('An error occurred when creating a random route:\n' + jqXHR.responseText);
+        cb(errorThrown);
+      }
     })
-    .done((newRoute) => { 
-      displayRoute(newRoute)
-      cb(null, newRoute); 
-    })
-    .fail((jqXHR, textStatus, errorThrown) => {
-      console.error('Error getting random route: ', textStatus, ', Details: ', errorThrown);
-      console.error('Response: ', jqXHR.responseText);
-      alert('An error occurred when creating a random route:\n' + jqXHR.responseText);
-      cb(errorThrown);
-    });
   }
 
   ////////////////////////////////////////////////////////////
@@ -234,7 +231,7 @@
       async.concat( // each(
         parents,
         (parent, makeChildren_cb) => {
-          makeChildren(parent, numChildren, generation, makeChildren_cb);
+          makeChildren(parent.routeId, numChildren, generation, makeChildren_cb);
         },
         genChildren_cb
       );
@@ -320,15 +317,35 @@
   //
   // as the `success` callback function in your Ajax call to make sure
   // the children pass down through the `runGeneration` waterfall.
-  function makeChildren(parent, numChildren, generation, cb) {
-    // FILL THIS IN
+  function makeChildren(routeId, numChildren, cb) {
+    $.ajax({
+      method: 'POST',
+      url: baseUrl + '/mutate-route',
+      data: JSON.stringify({routeId, numChildren, lengthStoreThreshold}),
+      success: children => cb(null, children),
+      error: function ajaxError(jqXHR, textStatus, errorThrown) {
+        console.error('Error fetching city data: ', textStatus, ', Details: ', errorThrown);
+        console.error('Response: ', jqXHR.responseText);
+        alert('An error occurred when fetching city data:\n' + jqXHR.responseText);
+        cb(errorThrown);
+      }
+    })
   }
 
   // Get the full details of the specified route. You should largely
   // have this done from the previous exercise. Make sure you pass
   // `callback` as the `success` callback function in the Ajax call.
   function getRouteById(routeId, callback) {
-    // FILL THIS IN
+    $.ajax({
+      method: 'GET',
+      url: baseUrl + '/routes/' + encodeURIComponent(routeId),
+      success: callback,
+      error: function ajaxError(jqXHR, textStatus, errorThrown) {
+        console.error('Error getting route by id: ', textStatus, ', Details: ', errorThrown);
+        console.error('Response: ', jqXHR.responseText);
+        alert('An error occurred when getting route by id:\n' + jqXHR.responseText);
+      }
+    })
   }
 
   // Get city data (names, locations, etc.) from your new Lambda that returns
@@ -387,8 +404,8 @@
   // Display a new (child) route (ID and length) in some way.
   // We just appended this as an `<li>` to the `new-route-list`
   // element in the HTML.
-  function displayRoute(result) {
-    // FILL THIS IN
+  function displayRoute(childRoute) {
+    $('#new-route-list').append(`<li>Length: ${childRoute.len} for Child Route: ${childRoute.routeId}</li>`);
   }
 
   // Display the best routes (length and IDs) in some way.
@@ -402,7 +419,10 @@
   // so the array of best routes is pass along through
   // the waterfall in `runGeneration`.
   function displayBestRoutes(bestRoutes, dbp_cb) {
-    // FILL THIS IN
+    bestRoutes.forEach(route => {
+      $('#best-route-list').append(`<li>Length: ${route.len} for Route Id: ${route.routeId}</li>`);
+    });
+    dbp_cb(null, bestRoutes);
   }
 
   ////////////////////////////////////////////////////////////
@@ -441,8 +461,8 @@
       // updated `best` to an even better route between
       // when we called `getRouteById` and when it returned
       // and called `processNewRoute`. The `route == ""`
-      // check is just in case we our attempt to get
-      // the route with the given idea fails, possibly due
+      // check is just in case our attempt to get
+      // the route with the given id fails, possibly due
       // to the eventual consistency property of the DB.
       if (best.len > route.len && route == "") {
         console.log(`Getting route ${routeId} failed; trying again.`);
