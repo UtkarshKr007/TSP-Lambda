@@ -116,11 +116,11 @@
     }
   }
 
-  function randomRoute(runId, generation, cb) {
+  function randomRoute(runId, gen, cb) {
     $.ajax({
       method: 'POST',
       url: baseUrl + '/routes',
-      data: JSON.stringify({runId, generation, lengthStoreThreshold}),
+      data: JSON.stringify({runId, gen, lengthStoreThreshold}),
       success: newRoute => [displayRoute(newRoute), cb(null, newRoute)],
       error: (jqXHR, textStatus, errorThrown) => {
         console.error('Error getting random route: ', textStatus, ', Details: ', errorThrown);
