@@ -231,7 +231,7 @@
       async.concat( // each(
         parents,
         (parent, makeChildren_cb) => {
-          makeChildren(parent.routeId, numChildren, generation, makeChildren_cb);
+          makeChildren(parent.routeId, numChildren, makeChildren_cb);
         },
         genChildren_cb
       );
