@@ -354,7 +354,7 @@
   function fetchCityData(callback) {
     $.ajax({
       method: 'GET',
-      url: baseUrl + '/city-data',
+      url: baseUrl + '/city-data?region=Minnesota',
       success: callback,
       error: function ajaxError(jqXHR, textStatus, errorThrown) {
         console.error('Error fetching city data: ', textStatus, ', Details: ', errorThrown);
