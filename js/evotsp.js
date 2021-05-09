@@ -3,9 +3,10 @@
   const baseUrl = "https://0z2figs2v9.execute-api.us-east-1.amazonaws.com/prod";
   var cityData;
   var lengthStoreThreshold = Infinity;
+  var runId;
 
   var best = {
-    runID: "", // The ID of the best current path
+    routeId: "", // The ID of the best current path
     bestPath: [], // The array of indices of best current path
     len: Infinity, // The length of the best current path
     coords: [], // The coordinates of the best current path
@@ -14,9 +15,8 @@
 
   function runEvolution() {
     // Generate a new runId and set the current generation to 0
-    const runId = generateUID(16);
+    runId = generateUID(16);
     const initialGeneration = 0;
-    $("#runId-text-field").val(runId);
     $("#current-generation").text(initialGeneration);
 
 
@@ -129,7 +129,6 @@
 
     function generateChildren(parents, genChildren_cb) {
       const numChildren = Math.floor(popSize / parents.length);
-      console.log("Num children is " + numChildren);
 
       async.concat( // each(
         parents,
@@ -146,25 +145,16 @@
         alert(errorMessage);
         throw new Error(errorMessage);
       }
-      // console.log("++++++++++++++++++++")
-      // console.log(JSON.stringify(bestRoutes));
-      // console.log("=======================")
-      // console.log(bestRoutes[bestRoutes.length - 1]);
-      // console.log("----------------------")
-      console.log("Old lengthStoreThreshold was " + lengthStoreThreshold);
+
       lengthStoreThreshold = bestRoutes[bestRoutes.length - 1].len;
-      console.log("New lengthStoreThreshold is " + lengthStoreThreshold);
       $("#current-threshold").text(lengthStoreThreshold);
       utl_cb(null, bestRoutes);
     }
   }
 
   function getBestRoutes(gen, callback) {
-    const runId = $('#runId-text-field').val();
     const amount = $('#num-parents').val();
     const queryString = $.param({ runId, gen, amount })
-    console.log("queryString is " + queryString);
-    console.log("run id is " + runId + " gen is " + gen + " amount is " + amount);
     $.ajax({
         method: 'GET',
         url: baseUrl + '/best?' + queryString,
@@ -180,7 +170,6 @@
 
 
   function makeChildren(routeId, numChildren, cb) {
-    console.log("Threshold sending when making children " + lengthStoreThreshold);
     $.ajax({
       method: 'POST',
       url: baseUrl + '/mutate-route',
