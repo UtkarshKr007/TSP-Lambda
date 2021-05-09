@@ -1,0 +1,29 @@
+body {
+    background-color: #7fdbff;
+}
+
+#page-header {
+    display: flex;
+    flex-direction: row;
+    gap: 24px;
+    margin: 24px 0px;
+}
+
+#page-content {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+#left {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 24px;
+}
+
+#right {
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+}
