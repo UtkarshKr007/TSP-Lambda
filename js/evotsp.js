@@ -300,9 +300,7 @@
   }
 
   function initializeMap(cities) {
-    console.log("cities received were " + JSON.stringify(cities));
     cityData = [];
-    var allCoordinates = [];
     for (let i = 0; i < cities.length; i++) {
       const city = cities[i];
       const cityName = city.cityName;
@@ -320,11 +318,8 @@
       };
       geojsonFeature.properties.name = cityName;
       geojsonFeature.properties.popupContent = cityName;
-      geojsonFeature.geometry.coordinates[0] = city.location[1];
-      geojsonFeature.geometry.coordinates[1] = city.location[0];
+      geojsonFeature.geometry.coordinates = swap(city.location);
       cityData[i] = geojsonFeature;
-
-      allCoordinates.push(city.location);
     }
 
     var layerProcessing = {
@@ -332,7 +327,7 @@
       onEachFeature: onEachFeature,
     };
 
-    myMap.fitBounds(allCoordinates);
+    myMap.fitBounds(cities.map(city => city.location));
 
     L.geoJSON(cityData, layerProcessing).addTo(myMap);
 
@@ -347,10 +342,11 @@
     }
   }
 
+  function swap(arr) {
+    return [arr[1], arr[0]];
+  }
+
   function updateMapCoordinates(path) {
-    function swap(arr) {
-      return [arr[1], arr[0]];
-    }
     for (var i = 0; i < path.length; i++) {
       best.coords[i] = swap(cityData[path[i]].geometry.coordinates);
     }
@@ -359,17 +355,29 @@
 
   function submitCustomCities() {
     initializeMap(customCities);
-    $("#run-evolution").prop('disabled', false);
+    var coordinates = cityData.map(data => data.geometry.coordinates);
+    var key = cityData.map(data => data.properties.name).join('-');
+    
+    // $.ajax({
+    //   method: 'POST',
+    //   url: baseUrl + '/city-data',
+    //   data: JSON.stringify({key, coordinates}),
+    //   success: (newCityData) => {console.log("new city data " + newCityData),},
+    //   error: (jqXHR, textStatus, errorThrown) => {
+    //     console.error('Error posting custom routes: ', textStatus, ', Details: ', errorThrown);
+    //     console.error('Response: ', jqXHR.responseText);
+    //     alert('An error occurred when posting custom routes:\n' + jqXHR.responseText);
+    //   }
+    // })
+    $("#run-evolution").prop('disabled', false)
   }
 
 
-  function onGeoCoderResult(e) {
+  function onGeocoderResult(e) {
 
     var nameArray = e.result.place_name.split(",");
     const cityName = nameArray[0] + nameArray[1];
-    const coords = e.result.geometry.coordinates;
-    const location = [coords[1], coords[0]]
-
+    const location = swap(e.result.geometry.coordinates);
 
     customCities.push({ cityName, location });
     $("#cities-list").append(`<li>${cityName}</li>`)
@@ -396,7 +404,7 @@
     });
 
     geocoder.addTo("#geocoder");
-    geocoder.on('result', (e) => onGeoCoderResult(e));
+    geocoder.on('result', (e) => onGeocoderResult(e));
     geocoder.on('clear', () => $('#result').text(""));
 
     $("#geo-controls").show();
