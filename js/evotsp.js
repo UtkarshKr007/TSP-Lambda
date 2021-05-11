@@ -4,6 +4,7 @@
   var cityData;
   var lengthStoreThreshold = Infinity;
   var runId;
+  var customCities = [];
 
   var best = {
     routeId: "", // The ID of the best current path
@@ -299,7 +300,9 @@
   }
 
   function initializeMap(cities) {
+    console.log("cities received were " + JSON.stringify(cities));
     cityData = [];
+    var allCoordinates = [];
     for (let i = 0; i < cities.length; i++) {
       const city = cities[i];
       const cityName = city.cityName;
@@ -320,12 +323,16 @@
       geojsonFeature.geometry.coordinates[0] = city.location[1];
       geojsonFeature.geometry.coordinates[1] = city.location[0];
       cityData[i] = geojsonFeature;
+
+      allCoordinates.push(city.location);
     }
 
     var layerProcessing = {
       pointToLayer: circleConvert,
       onEachFeature: onEachFeature,
     };
+
+    myMap.fitBounds(allCoordinates);
 
     L.geoJSON(cityData, layerProcessing).addTo(myMap);
 
@@ -350,11 +357,64 @@
     best.coords[i] = best.coords[0]; // End where we started
   }
 
+  function submitCustomCities() {
+    initializeMap(customCities);
+    $("#run-evolution").prop('disabled', false);
+  }
+
+
+  function onGeoCoderResult(e) {
+
+    var nameArray = e.result.place_name.split(",");
+    const cityName = nameArray[0] + nameArray[1];
+    const coords = e.result.geometry.coordinates;
+    const location = [coords[1], coords[0]]
+
+
+    customCities.push({ cityName, location });
+    $("#cities-list").append(`<li>${cityName}</li>`)
+    myMap.flyTo(location, 6);
+
+    if (customCities.length > 1 && customCities.length < 15 ) {
+      $("#submit-custom-cities").prop('disabled', false);
+      $("#warning").text("");
+    } else {
+      $("#submit-custom-cities").prop('disabled', true);
+      $("#warning").text("Use between 2 to 14 cities");
+    }
+  }
+
+
+  function useGeocoder() {
+    $("#cities-option").hide();
+    $("#cities-list").text(""); 
+
+    var geocoder = new MapboxGeocoder({
+      accessToken: "pk.eyJ1IjoidXRzMDA3IiwiYSI6ImNrbmUxeXQ3bzJjd2wybm4xbGphaWh4bXYifQ.RC2c1ZAAdwHBSgGyLRCcDg",
+      countries: "us",
+      types: "place"
+    });
+
+    geocoder.addTo("#geocoder");
+    geocoder.on('result', (e) => onGeoCoderResult(e));
+    geocoder.on('clear', () => $('#result').text(""));
+
+    $("#geo-controls").show();
+  }
+
+  function runDefaultSetup() {
+    $("#cities-option").hide();
+    fetchCityData(initializeMap);
+    $("#run-evolution").prop('disabled', false).click(runEvolution);
+  }
+
   $(function onDocReady() {
     $("#population-size-text-field").val(100);
     $("#num-parents").val(20);
     $("#num-generations").val(20);
+    $("#run-default-setup").click(runDefaultSetup);
+    $("#use-geocoder").click(useGeocoder);
+    $("#submit-custom-cities").click(submitCustomCities);
     $("#run-evolution").click(runEvolution);
-    fetchCityData(initializeMap);
   });
 })(jQuery);

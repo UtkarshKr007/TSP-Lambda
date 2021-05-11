@@ -27,3 +27,23 @@ body {
     flex-direction: column;
     margin: 0 auto;
 }
+
+#cities-list {
+    display: inline;
+    list-style: none;
+    padding: 0px;
+}
+
+
+#cities-list li {
+    display: inline;
+}
+
+#cities-list li::after {
+    content: ", ";
+}
+
+#cities-list li:last-child::after {
+    content: "";
+}
+

@@ -14,11 +14,39 @@
     crossorigin="" />
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
     integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
-    crossorigin=""></script>
+    crossorigin="">
+  </script>
+
+<!-- Load the `mapbox-gl-geocoder` plugin. -->
+<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.0/mapbox-gl-geocoder.min.js"></script>
+<link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.0/mapbox-gl-geocoder.css" type="text/css">
+ 
+<!-- Promise polyfill script is required -->
+<!-- to use Mapbox GL Geocoder in IE 11. -->
+<script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
+
 </head>
 
 <body>
   <h1>Evo-TSP</h1>
+  
+  <h3 id="cities-option">Would you like to run 2opt algorithm on the default cities listed below or enter cities of your own choosing ? 
+    <button id="run-default-setup">Use the default cities</button>
+    <button id="use-geocoder">Enter custom cities</button>
+  </h3>
+
+  <div id="geocoder"></div> 
+
+  <b>Cities selected:</b>
+  <ul id="cities-list">
+    <li>Minneapolis</li>
+    <li>St.Paul</li>
+    <li>Duluth</li>
+  </ul>
+
+  <p id=geo-controls style="display: none;"><button id="submit-custom-cities" disabled>Done adding cities</button> <span id="warning"></span></p>
+
   <div id="page-header">
     <div>
       <label for="population-size-text-field">Population size:</label>
@@ -54,7 +82,7 @@
         <label for="num-generations">How many generations to run?</label>
         <input type="text" id="num-generations" />
 
-        <button id="run-evolution">Run evolution</button>
+        <button id="run-evolution" disabled>Run evolution</button>
       </div>
 
       <div class="current-generation">
