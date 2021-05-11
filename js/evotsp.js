@@ -376,19 +376,18 @@
   function onGeocoderResult(e) {
 
     var nameArray = e.result.place_name.split(",");
-    const cityName = nameArray[0] + nameArray[1];
+    const cityName = nameArray[0] + " " + getStateCode(nameArray[1].trim());
     const location = swap(e.result.geometry.coordinates);
 
     customCities.push({ cityName, location });
     $("#cities-list").append(`<li>${cityName}</li>`)
     myMap.flyTo(location, 6);
-
-    if (customCities.length > 1 && customCities.length < 15 ) {
+    if (customCities.length > 1 && customCities.length <= 10 ) {
       $("#submit-custom-cities").prop('disabled', false);
       $("#warning").text("");
     } else {
       $("#submit-custom-cities").prop('disabled', true);
-      $("#warning").text("Use between 2 to 14 cities");
+      $("#warning").text("Use 2 to 10 cities");
     }
   }
 
