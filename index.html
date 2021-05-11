@@ -29,20 +29,27 @@
 </head>
 
 <body>
-  <h1>Evo-TSP</h1>
+  <h1>Evolutionary TSP Problem solved with 2opt algorithm and AWS services</h1>
   
-  <h3 id="cities-option">Would you like to run 2opt algorithm on the default cities listed below or enter cities of your own choosing ? 
-    <button id="run-default-setup">Use the default cities</button>
-    <button id="use-geocoder">Enter custom cities</button>
+  <h3 id="cities-option">You can run the 2opt algorithm on a pre-set route that ignore roads or use actual routes with cities of your own choosing ? 
+    <button id="run-default-setup">Use pre-set route</button>
+    <button id="use-geocoder">Enter custom cities and use road routes</button>
   </h3>
 
   <div id="geocoder"></div> 
 
   <b>Cities selected:</b>
   <ul id="cities-list">
-    <li>Minneapolis</li>
-    <li>St.Paul</li>
-    <li>Duluth</li>
+    <li>Minneapolis MN</li>
+    <li> Rochester MN</li>
+    <li>Worthington MN</li>
+    <li>Grand Marais MN</li>
+    <li>Fargo ND</li>
+    <li>Roseau MN</li>
+    <li>Saint Paul MN</li>
+    <li>Duluth MN</li>
+    <li>Bemidji MN</li>
+    <li>St. Cloud MN</li>
   </ul>
 
   <p id=geo-controls style="display: none;"><button id="submit-custom-cities" disabled>Done adding cities</button> <span id="warning"></span></p>

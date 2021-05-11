@@ -73,7 +73,7 @@
     $.ajax({
       method: 'POST',
       url: baseUrl + '/routes',
-      data: JSON.stringify({runId, gen}),
+      data: JSON.stringify({region ,runId, gen}),
       success: (newRoute) => {displayRoute(newRoute), cb(null, newRoute)},
       error: (jqXHR, textStatus, errorThrown) => {
         console.error('Error getting random route: ', textStatus, ', Details: ', errorThrown);
@@ -175,12 +175,11 @@
     $.ajax({
       method: 'POST',
       url: baseUrl + '/mutate-route',
-      data: JSON.stringify({routeId, numChildren, lengthStoreThreshold}),
+      data: JSON.stringify({region, routeId, numChildren, lengthStoreThreshold}),
       success: children => cb(null, children),
       error: function ajaxError(jqXHR, textStatus, errorThrown) {
-        console.error('Error fetching city data: ', textStatus, ', Details: ', errorThrown);
+        console.error('Error making children: ', textStatus, ', Details: ', errorThrown);
         console.error('Response: ', jqXHR.responseText);
-        alert('An error occurred when fetching city data:\n' + jqXHR.responseText);
         cb(errorThrown);
       }
     })
@@ -203,7 +202,7 @@
   function fetchCityData(callback) {
     $.ajax({
       method: 'GET',
-      url: baseUrl + '/city-data?region=Minnesota',
+      url: baseUrl + `/city-data?region=${region}`,
       success: callback,
       error: function ajaxError(jqXHR, textStatus, errorThrown) {
         console.error('Error fetching city data: ', textStatus, ', Details: ', errorThrown);
@@ -356,13 +355,13 @@
 
   function submitCustomCities() {
     initializeMap(customCities);
-    var coordinates = cityData.map(data => data.geometry.coordinates);
-    var region = cityData.map(data => data.properties.name).join('-');
-    
+    var cities = cityData.map((data,index) => { return( {index, cityName: data.properties.name} )});
+    var points = cityData.map(data => { return( {coordinates: data.geometry.coordinates} )});
+
     $.ajax({
       method: 'POST',
       url: baseUrl + '/city-data',
-      data: JSON.stringify({region, coordinates}),
+      data: JSON.stringify({cities, points}),
       success: (data) => {region = data.region, $("#run-evolution").prop('disabled', false)},
       error: (jqXHR, textStatus, errorThrown) => {
         console.error('Error posting custom routes: ', textStatus, ', Details: ', errorThrown);
