@@ -5,6 +5,7 @@
   var lengthStoreThreshold = Infinity;
   var runId;
   var customCities = [];
+  var region = "Minnesota";
 
   var best = {
     routeId: "", // The ID of the best current path
@@ -356,20 +357,20 @@
   function submitCustomCities() {
     initializeMap(customCities);
     var coordinates = cityData.map(data => data.geometry.coordinates);
-    var key = cityData.map(data => data.properties.name).join('-');
+    var region = cityData.map(data => data.properties.name).join('-');
     
-    // $.ajax({
-    //   method: 'POST',
-    //   url: baseUrl + '/city-data',
-    //   data: JSON.stringify({key, coordinates}),
-    //   success: (newCityData) => {console.log("new city data " + newCityData),},
-    //   error: (jqXHR, textStatus, errorThrown) => {
-    //     console.error('Error posting custom routes: ', textStatus, ', Details: ', errorThrown);
-    //     console.error('Response: ', jqXHR.responseText);
-    //     alert('An error occurred when posting custom routes:\n' + jqXHR.responseText);
-    //   }
-    // })
-    $("#run-evolution").prop('disabled', false)
+    $.ajax({
+      method: 'POST',
+      url: baseUrl + '/city-data',
+      data: JSON.stringify({region, coordinates}),
+      success: (data) => {region = data.region, $("#run-evolution").prop('disabled', false)},
+      error: (jqXHR, textStatus, errorThrown) => {
+        console.error('Error posting custom routes: ', textStatus, ', Details: ', errorThrown);
+        console.error('Response: ', jqXHR.responseText);
+        alert('An error occurred when posting custom routes:\n' + jqXHR.responseText);
+      }
+    })
+    
   }
 
 
